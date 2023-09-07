@@ -3,8 +3,13 @@ import * as cheerio from "cheerio";
 import TurndownService from "turndown";
 import { writeFile } from "fs-extra";
 import yaml from "js-yaml";
-import { getDate, getQuestionIndex, getRateCount, getTitle } from "./utils";
-import pinyin from "pinyin";
+import {
+  generateMD5Hash,
+  getDate,
+  getQuestionIndex,
+  getRateCount,
+  getTitle,
+} from "./utils";
 import path from "path";
 import { isUrlVisited, markUrlAsVisited } from "./cache";
 
@@ -80,11 +85,8 @@ const host = "https://fe.ecool.fun";
       pubDatetime: getDate($),
       author: "caorushizi",
       tags: [catorgory],
-      postSlug: pinyin(title, {
-        style: pinyin.STYLE_NORMAL,
-        segment: "segmentit",
-        group: true,
-      }).join("-"),
+      postSlug: generateMD5Hash(markdown),
+      description: markdown.replace(/\s+/g, "").slice(0, 100),
       difficulty: getRateCount($),
       questionNumber: getQuestionIndex($),
       source: url,
