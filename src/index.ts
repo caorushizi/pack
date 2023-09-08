@@ -45,9 +45,9 @@ turndownService.addRule("codeBlock", {
   filter: (node) =>
     node.nodeName === "DIV" && node.classList.contains("codeBox___24JI7"),
   replacement: (content, node) => {
-    const codeContent = node.querySelector("code.language-typescript")
-      ?.textContent;
-    return `\`\`\`typescript\n${codeContent}\n\`\`\``;
+    const codeContent = node.querySelector("code")?.textContent || "";
+    const language = node.querySelector("code")?.classList[0] || ""; // 获取第一个类名作为语言
+    return `\`\`\`${language.replace("language-", "")}\n${codeContent}\n\`\`\``;
   },
 });
 
@@ -76,8 +76,7 @@ const host = "https://fe.ecool.fun";
     );
 
     const markdown = turndownService.turndown(content);
-
-    const title = getTitle($).replace(/\n/g, "");
+    const title = getTitle($).replace(/\s/g, "");
     console.log(`开始解析 ${title}`);
 
     const metadata = {
@@ -136,13 +135,21 @@ const host = "https://fe.ecool.fun";
     return true;
   }
 
-  for (const key of Object.keys(catMap)) {
-    console.log(`开始解析 ${catMap[key]}`);
-    let pageNum = 1;
-    while (await parsePageList(Number(key), pageNum)) {
-      pageNum++;
+  async function start() {
+    for (const key of Object.keys(catMap)) {
+      console.log(`开始解析 ${catMap[key]}`);
+      let pageNum = 1;
+      while (await parsePageList(Number(key), pageNum)) {
+        pageNum++;
+      }
     }
   }
+
+  await start();
+  // await parsePage(
+  //   "https://fe.ecool.fun/topic-answer/94b843ea-1ede-4fa4-81ae-a92e612b4439?orderBy=updateTime&order=desc&tagId=0",
+  //   "javascript",
+  // );
 
   await browser.close();
 })();
